@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
 import { ITask } from "./interfaces/interfaces";
@@ -6,8 +6,9 @@ import { ITask } from "./interfaces/interfaces";
 import "./App.css";
 
 const App: FC = () => {
-
+  const [status, setStatus] = useState<string>('ALL')
   const [todoList, setTodoList] = useState<ITask[]>([]);
+  const [filterTodoList, setFilterTodoList] = useState<ITask[]>([]);
 
   const addTask = (task: ITask): void => {
     setTodoList([...todoList, task]);
@@ -27,16 +28,28 @@ const App: FC = () => {
     setTodoList(updateTodo);
   };
 
+  useEffect(() => {
+    filterTodos(status)
+  }, [todoList, status])
+
   const filterTodos = (filter: string) => {
-    console.log(filter)
-    
-  }
+    switch (filter) {
+      case "PENDING":
+        setFilterTodoList(todoList.filter((todo) => !todo.complete));
+        break;
+      case "DONE":
+        setFilterTodoList(todoList.filter((todo) => todo.complete));
+        break;
+      default:
+        setFilterTodoList(todoList);
+    }
+  };
 
   return (
     <div>
-      <TodoForm addTask={addTask} filterTodos={filterTodos} />
+      <TodoForm addTask={addTask} status={status} setStatus={setStatus} filterTodos={filterTodos} />
       <TodoList
-        todos={todoList}
+        todos={filterTodoList}
         completeTodo={completeTodo}
         deleteTodo={deleteTodo}
       />
